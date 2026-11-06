@@ -1,0 +1,2035 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linfa Gerais — Evolução Cronológica & Google Drive</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F8FAFC; color: #334155; }
+    .bg-brand { background: linear-gradient(135deg, #16A34A 0%, #15803D 100%); }
+    .text-brand { color: #16A34A; }
+    .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); }
+    .input-pro { background: #F1F5F9; border: 1px solid transparent; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .input-pro:focus { background: #FFFFFF; border-color: #16A34A; box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.1); outline: none; }
+    .tab-active { border-bottom: 3px solid #16A34A; color: #1E293B; font-weight: 800; }
+    .tab-inactive { color: #94A3B8; font-weight: 600; border-bottom: 3px solid transparent; }
+    .tab-inactive:hover { color: #64748B; border-bottom-color: #E2E8F0; }
+
+    .timeline-map {
+      cursor: grab;
+      user-select: none;
+      scroll-behavior: smooth;
+      background-image: radial-gradient(#CBD5E1 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+    .timeline-map:active {
+      cursor: grabbing;
+      scroll-behavior: auto;
+    }
+
+    ::-webkit-scrollbar { width: 6px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #F1F5F9; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb { background: #94A3B8; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #16A34A; }
+
+    .toast-enter { animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .toast-leave { animation: slideOut 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+    @media print { .no-print { display: none !important; } }
+  </style>
+</head>
+<body class="h-screen overflow-hidden flex flex-col md:flex-row antialiased relative selection:bg-brand selection:text-white">
+
+  <!-- ECRÃ DE LOGIN / REGISTO / GOOGLE DRIVE -->
+  <div id="auth-screen" class="absolute inset-0 z-50 bg-[#F8FAFC] flex items-center justify-center transition-all duration-700">
+    <div class="absolute top-0 left-0 w-full h-[40vh] bg-brand rounded-b-[50px] -z-10 shadow-lg"></div>
+
+    <div class="glass-card p-8 rounded-3xl w-[90%] max-w-md relative overflow-hidden shadow-2xl">
+      <div class="text-center mb-6">
+        <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-md text-brand">
+          <i data-lucide="activity" class="w-8 h-8"></i>
+        </div>
+        <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">Linfa Gerais</h1>
+        <p class="text-xs text-slate-500 font-medium mt-1">Evolução Cronológica de Feridas & Google Drive</p>
+      </div>
+
+      <!-- Login -->
+      <div id="form-login" class="space-y-3.5">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 ml-1">Email / Gmail</label>
+          <input type="email" id="login-email" placeholder="seuemail@gmail.com" class="w-full px-4 py-3 rounded-xl input-pro text-sm font-medium">
+        </div>
+        <div>
+          <div class="flex justify-between items-center mb-1 ml-1 mr-1">
+            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">Senha</label>
+            <button onclick="mudarAuth('recover')" class="text-[10px] font-bold text-brand hover:underline">Esqueceu a senha?</button>
+          </div>
+          <input type="password" id="login-pass" placeholder="••••••••" class="w-full px-4 py-3 rounded-xl input-pro text-sm font-medium">
+        </div>
+
+        <button onclick="fazerLogin()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all text-sm">
+          Entrar no Sistema
+        </button>
+
+        <div class="relative flex py-2 items-center">
+          <div class="flex-grow border-t border-slate-200"></div>
+          <span class="flex-shrink mx-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Acesso Rápido Google Drive</span>
+          <div class="flex-grow border-t border-slate-200"></div>
+        </div>
+
+        <button onclick="abrirSeletorGoogle()" class="w-full bg-white border-2 border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/30 text-slate-700 font-bold py-3 rounded-xl shadow-sm transition-all flex items-center justify-center gap-3 text-sm">
+          <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+          Conectar Gmail & Google Drive
+        </button>
+
+        <p class="text-center text-xs text-slate-500 mt-3 font-medium">
+          Primeiro acesso? <button onclick="mudarAuth('register')" class="text-brand font-bold hover:underline">Criar conta local</button>
+        </p>
+      </div>
+
+      <!-- Registo -->
+      <div id="form-register" class="space-y-3 hidden">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1 ml-1">Nome do Profissional</label>
+          <input type="text" id="reg-nome" placeholder="Digite o seu nome completo" class="w-full px-4 py-3 rounded-xl input-pro text-sm">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1 ml-1">Gmail (Para vínculo com Drive)</label>
+          <input type="email" id="reg-email" placeholder="seuemail@gmail.com" class="w-full px-4 py-3 rounded-xl input-pro text-sm">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1 ml-1">Senha de Acesso</label>
+          <input type="password" id="reg-pass" placeholder="Crie uma senha forte" class="w-full px-4 py-3 rounded-xl input-pro text-sm">
+        </div>
+        <button onclick="fazerRegisto()" class="w-full bg-brand text-white font-bold py-3.5 rounded-xl shadow-lg mt-4 text-sm">Registar no Linfa Gerais</button>
+        <p class="text-center text-xs text-slate-500 mt-3 font-medium">
+          <button onclick="mudarAuth('login')" class="text-brand font-bold hover:underline">Voltar ao Login</button>
+        </p>
+      </div>
+
+      <!-- Recuperação -->
+      <div id="form-recover" class="space-y-3 hidden">
+        <p class="text-xs text-slate-500 text-center mb-4">Insira o seu email para recuperar a senha local.</p>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1 ml-1">Email</label>
+          <input type="email" id="rec-email" placeholder="O seu email registado" class="w-full px-4 py-3 rounded-xl input-pro text-sm">
+        </div>
+        <button onclick="recuperarSenha()" class="w-full bg-slate-900 text-white font-bold py-3.5 rounded-xl shadow-lg mt-4 text-sm">Recuperar</button>
+        <button onclick="mudarAuth('login')" class="w-full text-slate-600 font-bold py-2 mt-1 text-xs">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MENU LATERAL (SIDEBAR) -->
+  <aside id="sidebar" class="w-full md:w-[320px] bg-white border-r border-slate-200 flex flex-col h-full z-10 shadow-sm hidden">
+    <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-brand rounded-xl flex items-center justify-center shadow-md text-white">
+          <i data-lucide="activity" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h1 class="text-[16px] font-extrabold text-slate-800 leading-tight">Linfa Gerais</h1>
+          <p class="text-[10px] font-bold text-brand uppercase tracking-wider truncate max-w-[165px]" id="status-conta-google">Modo Local</p>
+        </div>
+      </div>
+      <div class="flex gap-1">
+        <button onclick="puxarDadosDoDrive()" title="Carregar pacientes do Google Drive" class="p-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-emerald-50 hover:text-brand transition-all">
+          <i data-lucide="cloud-download" class="w-4 h-4"></i>
+        </button>
+        <button onclick="sincronizarComDrive()" title="Guardar tudo no Google Drive" class="p-2 rounded-xl bg-emerald-50 text-brand hover:bg-emerald-100 transition-all">
+          <i data-lucide="cloud-upload" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="p-4 space-y-3">
+      <button onclick="abrirModal('modal-novo-paciente', 'modal-novo-box')" class="w-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-3.5 rounded-xl shadow-md transition-all flex justify-center items-center gap-2">
+        <i data-lucide="user-plus" class="w-4 h-4"></i> Novo Paciente
+      </button>
+      <div class="relative">
+        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-slate-400"></i>
+        <input id="buscaPaciente" onkeyup="renderListaPacientes()" type="text" placeholder="Pesquisar por nome..." class="w-full pl-9 pr-3 py-2.5 rounded-xl input-pro text-xs font-medium">
+      </div>
+    </div>
+
+    <div class="px-5 pb-2 flex justify-between items-center">
+      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pacientes Registados</span>
+      <span id="contador-pacientes" class="bg-slate-100 text-slate-600 text-[10px] px-2 py-0.5 rounded-full font-bold">0</span>
+    </div>
+
+    <!-- Lista de Pacientes -->
+    <div id="listaPacientes" class="flex-1 overflow-y-auto px-3 space-y-1.5 pb-4"></div>
+
+    <!-- Rodapé do Utilizador e Google Drive -->
+    <div class="p-4 border-t border-slate-100 bg-slate-50/70 space-y-2">
+      <div onclick="abrirConfiguracoes()" class="flex items-center justify-between bg-white px-3 py-2 rounded-xl border border-slate-200 text-[11px] cursor-pointer hover:border-emerald-400 transition-all">
+        <span class="flex items-center gap-1.5 font-bold text-slate-600">
+          <i data-lucide="hard-drive" class="w-3.5 h-3.5 text-brand"></i> Ponte Drive:
+        </span>
+        <span id="estado-nuvem-texto" class="font-bold text-amber-600">Configurar Link</span>
+      </div>
+
+      <div class="flex items-center justify-between pt-1 cursor-pointer hover:opacity-80 transition-opacity" onclick="abrirConfiguracoes()">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-full bg-brand text-white flex items-center justify-center text-xs font-bold" id="avatar-user">LG</div>
+          <div class="overflow-hidden">
+            <p class="text-xs font-bold text-slate-700 truncate max-w-[160px]" id="nome-user-logado">Profissional</p>
+            <p class="text-[9px] text-slate-500 font-medium">Configurar Ponte Google Drive</p>
+          </div>
+        </div>
+        <i data-lucide="settings" class="w-4 h-4 text-slate-400"></i>
+      </div>
+    </div>
+  </aside>
+
+  <main id="main-content" class="flex-1 h-full overflow-y-auto relative hidden bg-slate-50">
+    <!-- Barra de Ações Superior -->
+    <div class="sticky top-0 right-0 p-4 md:px-8 bg-slate-50/90 backdrop-blur-md z-20 flex flex-wrap justify-between items-center gap-2 border-b border-slate-200/70 no-print">
+      <div class="flex items-center gap-2 text-xs font-bold text-slate-500">
+        <i data-lucide="cloud" class="w-4 h-4 text-brand"></i>
+        <span id="label-status-topo">Armazenamento Ilimitado Ativo (IndexedDB + Google Drive)</span>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button onclick="puxarDadosDoDrive()" class="bg-white border border-emerald-300 text-emerald-700 hover:bg-emerald-50 px-3.5 py-2 rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5 transition-all">
+          <i data-lucide="cloud-download" class="w-4 h-4"></i> Carregar do Drive
+        </button>
+        <button onclick="sincronizarComDrive()" id="btn-sync-topo" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-sm flex items-center gap-2 transition-all">
+          <i data-lucide="cloud-upload" class="w-4 h-4"></i> Sincronizar c/ Drive
+        </button>
+        <button onclick="abrirConfiguracoes()" class="bg-white border border-slate-200 text-slate-600 hover:border-slate-300 px-3 py-2 rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5">
+          <i data-lucide="link" class="w-4 h-4 text-brand"></i> Ponte Drive
+        </button>
+        <button onclick="fazerLogout()" class="bg-white border border-slate-200 text-red-500 hover:bg-red-50 px-3 py-2 rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5">
+          <i data-lucide="log-out" class="w-4 h-4"></i> Sair
+        </button>
+      </div>
+    </div>
+
+    <!-- Estado Vazio -->
+    <div id="estadoVazio" class="h-[85%] flex flex-col items-center justify-center text-center max-w-lg mx-auto p-8">
+      <div class="w-24 h-24 bg-white rounded-[2rem] shadow-sm border border-slate-100 flex items-center justify-center mb-6">
+        <i data-lucide="map" class="w-12 h-12 text-brand"></i>
+      </div>
+      <h2 class="text-3xl font-extrabold text-slate-800 mb-3 tracking-tight">Linfa Gerais Pronto</h2>
+      <p class="text-slate-500 text-sm mb-6 leading-relaxed">Selecione um paciente no menu lateral, crie uma nova ficha ou carregue os seus pacientes guardados no Google Drive.</p>
+      <div class="flex flex-wrap justify-center gap-3">
+        <button onclick="abrirModal('modal-novo-paciente', 'modal-novo-box')" class="bg-brand hover:bg-emerald-700 text-white px-6 py-3.5 rounded-xl text-xs font-bold shadow-lg flex items-center gap-2">
+          <i data-lucide="plus" class="w-4 h-4"></i> Novo Paciente
+        </button>
+        <button onclick="puxarDadosDoDrive()" class="bg-white border border-slate-200 hover:border-emerald-400 text-slate-700 px-5 py-3.5 rounded-xl text-xs font-bold shadow-sm flex items-center gap-2">
+          <i data-lucide="cloud-download" class="w-4 h-4 text-brand"></i> Buscar Pacientes do Drive
+        </button>
+      </div>
+    </div>
+
+    <!-- Ficha Principal do Paciente -->
+    <div id="fichaPaciente" class="max-w-6xl mx-auto space-y-6 hidden p-6 md:p-8 pb-24">
+
+      <!-- TOPO: NOME, FOTO PRINCIPAL E DATA DO OCORRIDO -->
+      <div class="glass-card p-6 md:p-8 rounded-[2rem] flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 border border-slate-200/80">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-5 w-full lg:w-auto">
+          <!-- Foto de Capa / Referência no Topo -->
+          <div class="relative group cursor-pointer shrink-0" onclick="document.getElementById('inputFotoCapa').click()" title="Clique para alterar a foto principal">
+            <input type="file" id="inputFotoCapa" accept="image/*" class="hidden" onchange="alterarFotoCapa(event)">
+            <img id="imgCapaPaciente" src="" class="hidden w-24 h-24 rounded-[1.5rem] object-cover shadow-md border-2 border-emerald-500">
+            <div id="iniciaisPaciente" class="w-24 h-24 bg-slate-100 rounded-[1.5rem] flex flex-col items-center justify-center text-slate-400 font-extrabold text-2xl shadow-inner border border-slate-200">
+              --
+            </div>
+            <div class="absolute -bottom-1 -right-1 bg-slate-900 text-white p-1.5 rounded-xl shadow-md">
+              <i data-lucide="camera" class="w-3.5 h-3.5"></i>
+            </div>
+          </div>
+
+          <!-- Nome e Data em Cima -->
+          <div class="space-y-2 flex-1">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="px-2.5 py-1 text-[10px] font-bold rounded-md bg-emerald-100 text-emerald-700 uppercase tracking-widest">Evolução de Ferida</span>
+              <span id="contador-evolucoes-topo" class="px-2.5 py-1 text-[10px] font-bold rounded-md bg-slate-100 text-slate-600">0 Registos</span>
+              <a id="link-pasta-drive-paciente" href="#" target="_blank" class="hidden px-2.5 py-1 text-[10px] font-bold rounded-md bg-blue-50 text-blue-700 hover:underline flex items-center gap-1">
+                <i data-lucide="folder-symlink" class="w-3 h-3"></i> Abrir Pasta no Drive
+              </a>
+            </div>
+            <input id="pacNomeTopo" oninput="sincronizarNomeTopo()" type="text" class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight bg-transparent border-b border-transparent hover:border-slate-300 focus:border-emerald-500 focus:outline-none w-full" placeholder="Nome do Paciente">
+            <div class="flex flex-wrap items-center gap-4 pt-1">
+              <div class="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-xl">
+                <i data-lucide="calendar" class="w-4 h-4 text-brand"></i>
+                <span class="text-[11px] font-bold text-slate-500 uppercase">Data de Início / Ocorrido:</span>
+                <input id="pacDataInicio" onchange="salvarPacienteAtual(true)" type="date" class="bg-transparent text-xs font-extrabold text-slate-800 focus:outline-none">
+              </div>
+              <div class="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-400"></i>
+                <input id="pacLocalFerida" onchange="salvarPacienteAtual(true)" type="text" placeholder="Região / Local da ferida (ex: Perna Direita)" class="bg-transparent border-b border-dashed border-slate-300 focus:border-emerald-500 focus:outline-none text-xs font-semibold text-slate-700 w-56">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2.5 no-print w-full lg:w-auto justify-end">
+          <button onclick="irParaNovaEvolucao()" class="bg-brand hover:bg-emerald-700 text-white px-4 py-3 rounded-xl text-xs font-bold shadow-md flex items-center gap-2">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i> + Nova Evolução / Fotos
+          </button>
+          <button onclick="gerarPDF()" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-3 rounded-xl text-xs font-bold shadow-md flex items-center gap-2">
+            <i data-lucide="file-down" class="w-4 h-4"></i> PDF
+          </button>
+          <button onclick="confirmarExclusao()" class="bg-white border border-red-200 hover:bg-red-50 text-red-600 px-3.5 py-3 rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5" title="Excluir Paciente">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- NAVEGAÇÃO ENTRE ABAS -->
+      <div class="flex gap-6 md:gap-8 border-b border-slate-200 px-4 no-print overflow-x-auto">
+        <button onclick="mudarAba('timeline')" id="tab-timeline" class="pb-4 tab-active flex items-center gap-2 text-sm tracking-wide whitespace-nowrap">
+          <i data-lucide="git-commit-horizontal" class="w-4 h-4"></i> Mapa da Linha do Tempo
+        </button>
+        <button onclick="mudarAba('alimentar')" id="tab-alimentar" class="pb-4 tab-inactive flex items-center gap-2 text-sm tracking-wide whitespace-nowrap">
+          <i data-lucide="image-plus" class="w-4 h-4"></i> Alimentar Sistema (Registar / Editar)
+        </button>
+        <button onclick="mudarAba('dados')" id="tab-dados" class="pb-4 tab-inactive flex items-center gap-2 text-sm tracking-wide whitespace-nowrap">
+          <i data-lucide="user" class="w-4 h-4"></i> Ficha Clínica
+        </button>
+      </div>
+
+      <div id="conteudo-pdf" class="space-y-6">
+
+        <!-- ABA 1: MAPA ARRASTÁVEL DA LINHA DO TEMPO (ORDEM CRONOLÓGICA) -->
+        <div id="aba-timeline" class="glass-card p-6 md:p-8 rounded-[2rem] space-y-5">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <h3 class="text-base font-extrabold text-slate-800 flex items-center gap-2">
+                <i data-lucide="compass" class="w-5 h-5 text-brand"></i> Mapa Cronológico de Evolução da Ferida
+              </h3>
+              <p class="text-xs text-slate-500 font-medium mt-0.5">Arraste para os lados para navegar pelos dias. As fotos com ícone de nuvem estão guardadas no seu Google Drive e carregam automaticamente.</p>
+            </div>
+            <div class="flex items-center gap-2 no-print">
+              <button onclick="moverMapaTimeline(-340)" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1">
+                <i data-lucide="chevron-left" class="w-4 h-4"></i> Anterior
+              </button>
+              <button onclick="moverMapaTimeline(340)" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1">
+                Seguinte <i data-lucide="chevron-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Contentor Arrastável Estilo Mapa -->
+          <div id="mapa-timeline" class="timeline-map relative w-full overflow-x-auto rounded-2xl border border-slate-200 bg-slate-50/70 p-6 min-h-[420px] flex items-center">
+            <div id="trilho-cronologico" class="flex items-stretch gap-8 relative min-w-max py-4 px-4"></div>
+          </div>
+        </div>
+
+        <!-- ABA 2: ALIMENTAR O SISTEMA (ADICIONAR OU EDITAR DIA + VÁRIAS FOTOS) -->
+        <div id="aba-alimentar" class="hidden glass-card p-6 md:p-8 rounded-[2rem] space-y-6">
+          <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+            <div>
+              <span id="badge-modo-edicao" class="hidden px-2.5 py-0.5 text-[10px] font-bold bg-amber-100 text-amber-800 rounded-md uppercase mb-1 inline-block">Modo Edição Ativo</span>
+              <h3 id="titulo-form-evolucao" class="text-base font-extrabold text-slate-800 flex items-center gap-2">
+                <i data-lucide="plus-square" class="w-5 h-5 text-brand"></i> Alimentar Linha do Tempo (Novo Registo)
+              </h3>
+            </div>
+            <button id="btn-cancelar-edicao" onclick="limparFormularioEvolucao()" class="hidden text-xs font-bold text-slate-500 hover:text-slate-800 bg-slate-100 px-3 py-2 rounded-xl">
+              Cancelar Edição
+            </button>
+          </div>
+
+          <input type="hidden" id="evIdEdicao" value="">
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Coluna de Upload de Múltiplas Fotografias -->
+            <div class="lg:col-span-5 space-y-4">
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Fotografias deste Dia (Pode escolher várias)</label>
+
+              <div class="bg-slate-50 p-5 rounded-2xl border-2 border-dashed border-slate-300 hover:border-emerald-500 transition-colors text-center">
+                <input type="file" accept="image/*" multiple id="fotoMultiInput" class="hidden" onchange="adicionarFotosAoLote(event)">
+                <div class="py-6 flex flex-col items-center justify-center cursor-pointer" onclick="document.getElementById('fotoMultiInput').click()">
+                  <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center mb-3 shadow-sm border border-slate-200 text-brand">
+                    <i data-lucide="images" class="w-7 h-7"></i>
+                  </div>
+                  <p class="text-xs font-extrabold text-slate-700">Clique para adicionar uma ou mais fotos</p>
+                  <p class="text-[11px] text-slate-400 mt-1">Serão guardadas automaticamente na pasta do paciente no Google Drive</p>
+                </div>
+              </div>
+
+              <!-- Grelha de Pré-visualização das Fotos Selecionadas -->
+              <div id="galeriaPreviewLote" class="grid grid-cols-3 gap-3 pt-2"></div>
+            </div>
+
+            <!-- Coluna de Dados Cronológicos e Evolução da Ferida -->
+            <div class="lg:col-span-7 space-y-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Data do Registo / Atendimento *</label>
+                  <input id="evData" type="date" class="w-full input-pro rounded-xl px-4 py-3 text-sm font-bold text-slate-800">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Hora (Opcional)</label>
+                  <input id="evHora" type="time" class="w-full input-pro rounded-xl px-4 py-3 text-sm font-bold text-slate-800">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Aspeto / Tecido Predominante</label>
+                  <input id="evTecido" type="text" placeholder="Ex: Granulação, Epitelização, Esfacelo..." class="w-full input-pro rounded-xl px-4 py-3 text-sm font-semibold text-slate-700">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Medidas / Tamanho (cm)</label>
+                  <input id="evMedidas" type="text" placeholder="Ex: 4,5 cm x 3,0 cm (Prof: 0,5 cm)" class="w-full input-pro rounded-xl px-4 py-3 text-sm font-semibold text-slate-700">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Evolução da Ferida e Conduta Aplicada</label>
+                <textarea id="evConduta" rows="5" placeholder="Descreva como a ferida evoluiu desde a última data, limpeza realizada, cobertura utilizada e orientações..." class="w-full input-pro rounded-xl px-4 py-3 text-sm font-medium leading-relaxed"></textarea>
+              </div>
+
+              <div class="pt-2 flex justify-end gap-3">
+                <button id="btn-guardar-evolucao" onclick="guardarEvolucaoNaTimeline()" class="w-full sm:w-auto bg-brand hover:bg-emerald-700 text-white px-8 py-3.5 rounded-xl text-xs font-extrabold shadow-lg flex items-center justify-center gap-2 transition-all">
+                  <i data-lucide="cloud-upload" class="w-4 h-4"></i> Guardar na Linha do Tempo & Drive
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA 3: DADOS GERAIS DO PACIENTE -->
+        <div id="aba-dados" class="hidden glass-card p-6 md:p-8 rounded-[2rem] space-y-6">
+          <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2 mb-4 border-b border-slate-100 pb-2">
+            <i data-lucide="file-text" class="w-4 h-4 text-brand"></i> Dados Clínicos e Histórico do Paciente
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Nome Completo</label>
+              <input id="pacNome" oninput="sincronizarNome()" type="text" class="w-full input-pro rounded-xl px-4 py-3 text-sm font-medium">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Idade</label>
+              <input id="pacIdade" type="number" placeholder="Ex: 52" class="w-full input-pro rounded-xl px-4 py-3 text-sm font-medium">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">CPF / Documento</label>
+              <input id="pacCpf" type="text" placeholder="000.000.000-00" class="w-full input-pro rounded-xl px-4 py-3 text-sm font-medium">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Contacto / WhatsApp</label>
+              <input id="pacContacto" type="text" placeholder="(00) 00000-0000" class="w-full input-pro rounded-xl px-4 py-3 text-sm font-medium">
+            </div>
+            <div class="md:col-span-3">
+              <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Comorbilidades, Alergias e Histórico Clínico</label>
+              <textarea id="pacComorbilidades" rows="3" class="w-full input-pro rounded-xl px-4 py-3 text-sm font-medium leading-relaxed" placeholder="Diabetes, hipertensão, problemas vasculares, medicações em uso..."></textarea>
+            </div>
+          </div>
+          <div class="flex justify-end pt-2 no-print">
+            <button onclick="salvarPacienteAtual()" class="bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-xl text-xs font-bold shadow-md flex items-center gap-2">
+              <i data-lucide="save" class="w-4 h-4"></i> Guardar Dados Clínicos
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL VISUALIZADOR DE IMAGENS (LIGHTBOX DA LINHA DO TEMPO) -->
+  <div id="modal-lightbox" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center hidden opacity-0 transition-opacity p-4">
+    <div class="w-full max-w-5xl flex justify-between items-center text-white mb-4 px-2">
+      <div>
+        <span id="lightbox-data" class="text-xs font-extrabold uppercase tracking-wider bg-brand px-3 py-1 rounded-full">Data</span>
+        <h4 id="lightbox-titulo" class="text-sm font-bold text-slate-200 mt-1">Detalhes da Evolução</h4>
+      </div>
+      <div class="flex items-center gap-3">
+        <a id="lightbox-link-drive" href="#" target="_blank" class="hidden text-xs font-bold bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-xl text-emerald-300 flex items-center gap-1.5">
+          <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Ver no Google Drive
+        </a>
+        <span id="lightbox-contador" class="text-xs font-bold text-slate-400">1 / 1</span>
+        <button onclick="fecharLightbox()" class="p-2 bg-white/10 hover:bg-white/20 rounded-xl text-white transition-all">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="relative w-full max-w-4xl flex items-center justify-center">
+      <button id="btn-lb-ant" onclick="navegarLightbox(-1)" class="absolute left-2 md:-left-12 p-3 rounded-full bg-white/10 hover:bg-white/25 text-white transition-all">
+        <i data-lucide="chevron-left" class="w-6 h-6"></i>
+      </button>
+      <img id="lightbox-img" src="" class="max-h-[72vh] max-w-full object-contain rounded-2xl shadow-2xl border border-white/10">
+      <button id="btn-lb-prox" onclick="navegarLightbox(1)" class="absolute right-2 md:-right-12 p-3 rounded-full bg-white/10 hover:bg-white/25 text-white transition-all">
+        <i data-lucide="chevron-right" class="w-6 h-6"></i>
+      </button>
+    </div>
+
+    <div id="lightbox-legenda" class="w-full max-w-3xl mt-4 bg-white/10 backdrop-blur-md p-4 rounded-2xl text-xs text-slate-200 font-medium text-center"></div>
+  </div>
+
+  <!-- MODAL DE DEFINIÇÕES / PONTE DIRETA GOOGLE DRIVE -->
+  <div id="modal-config" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center hidden opacity-0 transition-opacity">
+    <div class="bg-white w-[90%] max-w-lg rounded-[2rem] shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300 max-h-[90vh] flex flex-col" id="modal-config-box">
+      <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+        <div class="flex items-center gap-2">
+          <i data-lucide="cloud-cog" class="w-5 h-5 text-brand"></i>
+          <h3 class="font-bold text-slate-800 text-sm">Ponte Direta Google Drive & Definições</h3>
+        </div>
+        <button onclick="fecharModal('modal-config')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div class="p-6 space-y-6 overflow-y-auto flex-1">
+        <!-- Secção Ponte Direta Google Drive -->
+        <div class="space-y-3 bg-emerald-50/70 p-4 rounded-2xl border border-emerald-200">
+          <h4 class="text-xs font-extrabold text-emerald-900 uppercase tracking-wider flex items-center gap-1.5">
+            <i data-lucide="hard-drive" class="w-4 h-4 text-brand"></i> 1. Link da Ponte Direta Google Drive (Apps Script)
+          </h4>
+          <p class="text-[11px] text-slate-600 leading-relaxed">
+            Cole abaixo o link <b>https://script.google.com/macros/s/.../exec</b> gerado no seu Google Drive. Com ele ativo, todas as fotos são salvas em pastas reais por paciente no seu Drive (15 GB) e carregadas direto da nuvem!
+          </p>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">URL da Ponte Google Drive:</label>
+            <input type="url" id="cfg-drive-bridge-url" placeholder="https://script.google.com/macros/s/.../exec" class="w-full bg-white border border-emerald-300 rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          </div>
+          <div class="flex gap-2 pt-1">
+            <button onclick="testarConexaoDrive()" class="bg-brand hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-sm">
+              <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Testar Ligação ao Drive
+            </button>
+            <button onclick="puxarDadosDoDrive()" class="bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-100 font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5">
+              <i data-lucide="cloud-download" class="w-3.5 h-3.5"></i> Puxar Pacientes da Nuvem
+            </button>
+          </div>
+        </div>
+
+        <!-- Secção Perfil -->
+        <div class="space-y-3">
+          <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Dados do Profissional</h4>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Nome do Profissional</label>
+            <input type="text" id="cfg-nome" class="w-full input-pro rounded-xl px-4 py-2.5 text-sm font-medium">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Gmail Vinculado ao Drive</label>
+            <input type="email" id="cfg-email" class="w-full input-pro rounded-xl px-4 py-2.5 text-sm font-medium">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Nova Senha Local (Opcional)</label>
+            <input type="password" id="cfg-pass" placeholder="Deixar em branco para manter a atual" class="w-full input-pro rounded-xl px-4 py-2.5 text-sm font-medium">
+          </div>
+        </div>
+
+        <!-- Gestão de Dados Manual (Opcional) -->
+        <div class="space-y-3 pt-4 border-t border-slate-100">
+          <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Cópia Manual no Dispositivo (Opcional)</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <button onclick="exportarArquivoJsonLocal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5">
+              <i data-lucide="download" class="w-4 h-4"></i> Baixar .JSON
+            </button>
+            <button onclick="document.getElementById('inputImportarBackup').click()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5">
+              <i data-lucide="upload" class="w-4 h-4"></i> Abrir .JSON
+            </button>
+            <input type="file" id="inputImportarBackup" accept=".json" class="hidden" onchange="importarBackupDrive(event)">
+            <button onclick="limparDadosLocais()" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5">
+              <i data-lucide="trash" class="w-4 h-4"></i> Limpar Cache
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-2">
+        <button onclick="fecharModal('modal-config')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-xl text-xs font-bold">Cancelar</button>
+        <button onclick="salvarConfiguracoes()" class="px-5 py-2 bg-brand text-white rounded-xl text-xs font-bold shadow-md">Guardar Configurações</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL NOVO PACIENTE -->
+  <div id="modal-novo-paciente" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center hidden opacity-0 transition-opacity">
+    <div class="bg-white w-[90%] max-w-md rounded-[2rem] shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300" id="modal-novo-box">
+      <div class="p-6 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+        <h3 class="font-bold text-slate-800 text-sm">Registar Novo Paciente</h3>
+        <button onclick="fecharModal('modal-novo-paciente')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div class="p-6 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Nome do Paciente *</label>
+          <input type="text" id="novo-pac-nome" placeholder="Digite o nome completo do paciente" class="w-full input-pro rounded-xl px-4 py-3 text-sm font-bold">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Data do Ocorrido / Início</label>
+            <input type="date" id="novo-pac-data" class="w-full input-pro rounded-xl px-3 py-3 text-xs font-bold">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Local da Ferida</label>
+            <input type="text" id="novo-pac-local" placeholder="Ex: Tornozelo Esq." class="w-full input-pro rounded-xl px-3 py-3 text-xs font-bold">
+          </div>
+        </div>
+        <div class="flex gap-2 pt-2">
+          <button onclick="fecharModal('modal-novo-paciente')" class="w-1/3 bg-slate-100 text-slate-600 font-bold py-3 rounded-xl text-xs">Cancelar</button>
+          <button onclick="criarNovoPaciente()" class="w-2/3 bg-brand text-white font-bold py-3 rounded-xl shadow-md text-xs">Criar Linha do Tempo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL AUTENTICAÇÃO REAL GOOGLE / CONFIRMAÇÃO POR E-MAIL -->
+  <div id="modal-google" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center hidden opacity-0 transition-opacity">
+    <div class="bg-white w-[92%] max-w-md rounded-[2rem] shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300" id="modal-google-box">
+      <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+        <div class="flex items-center gap-2.5">
+          <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+          <h3 class="font-extrabold text-slate-800 text-sm">Continuar com o Google — Linfa Gerais</h3>
+        </div>
+        <button onclick="fecharModal('modal-google')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div class="p-6 space-y-4">
+        <!-- Contas reais já verificadas neste dispositivo -->
+        <div id="bloco-contas-salvas" class="hidden space-y-2 pb-3 border-b border-slate-100">
+          <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Contas Verificadas</p>
+          <div id="lista-contas-google" class="space-y-2"></div>
+        </div>
+
+        <!-- Etapa 1: Informar Gmail Real e Link da Ponte -->
+        <div id="google-step-1" class="space-y-3.5">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">1. Seu Gmail Real *</label>
+            <input type="email" id="manual-google-email" placeholder="Digite seu e-mail @gmail.com" class="w-full px-4 py-3 rounded-xl input-pro text-sm font-semibold text-slate-800">
+          </div>
+
+          <div class="bg-emerald-50/70 p-3.5 rounded-2xl border border-emerald-200 space-y-2">
+            <label class="block text-[11px] font-extrabold text-emerald-900 uppercase flex items-center gap-1.5">
+              <i data-lucide="link" class="w-3.5 h-3.5 text-brand"></i> 2. Link da sua Ponte Google (Apps Script)
+            </label>
+            <input type="url" id="login-bridge-url" placeholder="https://script.google.com/macros/s/.../exec" class="w-full bg-white border border-emerald-300 rounded-xl px-3 py-2 text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <p class="text-[10px] text-slate-600 leading-relaxed">
+              Com este link preenchido, o Google enviará uma <b>mensagem real de confirmação para a caixa de entrada do seu Gmail</b> para autorizar o login.
+            </p>
+          </div>
+
+          <button id="btn-enviar-codigo-gmail" onclick="solicitarConfirmacaoPorEmail()" class="w-full bg-brand hover:bg-emerald-700 text-white font-extrabold py-3.5 rounded-xl text-xs shadow-lg transition-all flex items-center justify-center gap-2">
+            <i data-lucide="mail-check" class="w-4 h-4"></i> Enviar Confirmação para meu Gmail
+          </button>
+
+          <div class="pt-3 border-t border-slate-100 space-y-2">
+            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ou Login Oficial Google OAuth 2.0 (Em HTTPS)</label>
+            <input type="text" id="login-google-client-id" placeholder="Google OAuth Client ID (.apps.googleusercontent.com)" class="w-full px-3 py-2 rounded-xl input-pro text-[11px] font-mono text-slate-700">
+            <button onclick="loginOficialGoogleOAuth()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl text-xs transition-all flex items-center justify-center gap-2">
+              <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i> Abrir Janela Oficial da Google (HTTPS)
+            </button>
+          </div>
+        </div>
+
+        <!-- Etapa 2: Digitar Código Recebido no E-mail -->
+        <div id="google-step-2" class="hidden space-y-4 text-center py-2">
+          <div class="w-12 h-12 bg-emerald-100 text-brand rounded-2xl flex items-center justify-center mx-auto">
+            <i data-lucide="mail-open" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h4 class="text-sm font-extrabold text-slate-800">Verifique a caixa de entrada do seu Gmail!</h4>
+            <p class="text-xs text-slate-500 mt-1">Enviamos uma mensagem perguntando se deseja continuar no <b>Linfa Gerais</b> para <b id="email-destino-label" class="text-slate-800"></b>.</p>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Código de 6 dígitos recebido no e-mail</label>
+            <input type="text" id="input-codigo-verificacao" maxlength="6" placeholder="000000" class="w-48 mx-auto text-center tracking-[0.35em] font-mono text-lg font-extrabold px-4 py-3 rounded-xl input-pro border-2 border-emerald-400">
+          </div>
+          <div class="flex gap-2 pt-2">
+            <button onclick="voltarStep1Google()" class="w-1/3 bg-slate-100 text-slate-600 font-bold py-3 rounded-xl text-xs">Voltar</button>
+            <button onclick="validarCodigoRecebidoNoGmail()" class="w-2/3 bg-slate-900 hover:bg-slate-800 text-white font-extrabold py-3 rounded-xl text-xs shadow-lg">Confirmar e Entrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
+
+  <script>
+    if(window.lucide) lucide.createIcons();
+
+    // ================= BANCO DE DADOS ILIMITADO (IndexedDB) + PONTE GOOGLE DRIVE =================
+    const DB_NAME = "LinfaGeraisDB";
+    const DB_VERSION = 1;
+    let idbInstance = null;
+
+    function abrirIndexedDB() {
+      return new Promise((resolve, reject) => {
+        if(idbInstance) return resolve(idbInstance);
+        const req = indexedDB.open(DB_NAME, DB_VERSION);
+        req.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if(!db.objectStoreNames.contains("pacientes_store")) {
+            db.createObjectStore("pacientes_store");
+          }
+          if(!db.objectStoreNames.contains("fotos_cache")) {
+            db.createObjectStore("fotos_cache");
+          }
+        };
+        req.onsuccess = (e) => {
+          idbInstance = e.target.result;
+          resolve(idbInstance);
+        };
+        req.onerror = (e) => reject(e.target.error);
+      });
+    }
+
+    async function idbGet(storeName, key) {
+      try {
+        const db = await abrirIndexedDB();
+        return new Promise((resolve) => {
+          const tx = db.transaction(storeName, "readonly");
+          const req = tx.objectStore(storeName).get(key);
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => resolve(null);
+        });
+      } catch(e) { return null; }
+    }
+
+    async function idbSet(storeName, key, val) {
+      try {
+        const db = await abrirIndexedDB();
+        return new Promise((resolve) => {
+          const tx = db.transaction(storeName, "readwrite");
+          tx.objectStore(storeName).put(val, key);
+          tx.oncomplete = () => resolve(true);
+          tx.onerror = () => resolve(false);
+        });
+      } catch(e) { return false; }
+    }
+
+    // Estado da aplicação
+    let utilizadores = JSON.parse(localStorage.getItem("linfa_gerais_users") || "[]");
+    let userLogado = JSON.parse(sessionStorage.getItem("linfa_gerais_session") || "null");
+    let pacientesBanco = [];
+    let pacienteAtualId = null;
+    let fotosLoteAtual = []; // Objetos { src, fileId, viewUrl, webViewLink } ou string base64
+    let lightboxFotos = [];
+    let lightboxIndex = 0;
+
+    function obterUrlPonteDrive() {
+      return (localStorage.getItem("linfa_gerais_drive_bridge_url") || "").trim();
+    }
+
+    window.onload = async () => {
+      await abrirIndexedDB();
+      configurarArrasteMapa();
+      const hoje = new Date().toISOString().split('T')[0];
+      if(document.getElementById('evData')) document.getElementById('evData').value = hoje;
+      if(document.getElementById('novo-pac-data')) document.getElementById('novo-pac-data').value = hoje;
+      if(userLogado) await carregarSistemaLogado();
+    };
+
+    function mostrarToast(msg, tipo = 'success') {
+      const c = document.getElementById('toast-container');
+      const t = document.createElement('div');
+      const icon = tipo === 'success'
+        ? '<i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i>'
+        : '<i data-lucide="alert-circle" class="w-4 h-4 text-red-500"></i>';
+      t.className = `flex items-center gap-3 px-4 py-3 rounded-xl shadow-2xl border border-slate-100 bg-white toast-enter mb-2`;
+      t.innerHTML = `${icon} <span class="text-xs font-bold text-slate-700">${msg}</span>`;
+      c.appendChild(t);
+      if(window.lucide) lucide.createIcons();
+      setTimeout(() => {
+        t.classList.replace('toast-enter', 'toast-leave');
+        setTimeout(() => t.remove(), 300);
+      }, 3500);
+    }
+
+    // ================= AUTENTICAÇÃO =================
+    function mudarAuth(t) {
+      ['login', 'register', 'recover'].forEach(x => document.getElementById('form-'+x).classList.add('hidden'));
+      document.getElementById('form-'+t).classList.remove('hidden');
+    }
+
+    function fazerRegisto() {
+      const nome = document.getElementById('reg-nome').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const pass = document.getElementById('reg-pass').value;
+      if(!nome || !email || !pass) return mostrarToast("Preencha todos os campos.", "error");
+      if(utilizadores.find(u => u.email === email)) return mostrarToast("Email já registado.", "error");
+      utilizadores.push({ nome, email, pass, viaGoogle: true });
+      localStorage.setItem("linfa_gerais_users", JSON.stringify(utilizadores));
+      mostrarToast("Conta criada no Linfa Gerais!");
+      mudarAuth('login');
+    }
+
+    function fazerLogin() {
+      const email = document.getElementById('login-email').value.trim();
+      const pass = document.getElementById('login-pass').value;
+      const user = utilizadores.find(u => u.email === email && u.pass === pass);
+      if(user) iniciarSessaoComUsuario(user, true);
+      else mostrarToast("Credenciais incorretas.", "error");
+    }
+
+    let codigoGeradoAtual = null;
+    let emailPendenteConfirmacao = null;
+
+    async function recuperarSenha() {
+      const email = document.getElementById('rec-email').value.trim();
+      if(!email || !email.includes('@')) return mostrarToast("Digite o seu e-mail.", "error");
+      const user = utilizadores.find(u => u.email.toLowerCase() === email.toLowerCase());
+      const bridgeUrl = obterUrlPonteDrive();
+
+      if(bridgeUrl) {
+        mostrarToast("A enviar recuperação para o seu Gmail...");
+        try {
+          const senhaTexto = user ? user.pass : "Acesso via Confirmação Google (Sem senha local)";
+          const res = await fetch(bridgeUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+              action: "recoverPasswordEmail",
+              email: email,
+              senha: senhaTexto
+            })
+          });
+          const json = await res.json();
+          if(json && json.ok) {
+            mostrarToast("Enviamos os dados de acesso para a caixa de entrada do seu Gmail!");
+            mudarAuth('login');
+            return;
+          }
+        } catch(e) {}
+      }
+
+      if(user) {
+        alert("A sua senha local registada neste aparelho é: " + user.pass);
+        mudarAuth('login');
+      } else {
+        mostrarToast("E-mail ainda não registado neste navegador. Use 'Criar conta local' ou 'Conectar Gmail'.", "error");
+      }
+    }
+
+    function abrirSeletorGoogle() {
+      // Remove qualquer e-mail fictício antigo que tenha ficado salvo
+      let contasSalvas = JSON.parse(localStorage.getItem("linfa_gerais_google_contas") || "[]");
+      contasSalvas = contasSalvas.filter(e => Boolean(e && e.includes("@")));
+      localStorage.setItem("linfa_gerais_google_contas", JSON.stringify(contasSalvas));
+
+      const blocoContas = document.getElementById('bloco-contas-salvas');
+      const container = document.getElementById('lista-contas-google');
+      container.innerHTML = "";
+
+      if(contasSalvas.length > 0) {
+        blocoContas.classList.remove('hidden');
+        contasSalvas.forEach(email => {
+          const div = document.createElement('div');
+          div.className = "flex items-center gap-2";
+          div.innerHTML = `
+            <button onclick="preencherEmailParaConfirmacao('${email}')" class="flex-1 text-left px-4 py-2.5 rounded-xl bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 flex items-center justify-between transition-all">
+              <span class="text-xs font-bold text-slate-700">${email}</span>
+              <span class="text-[10px] text-brand font-extrabold">Receber Código →</span>
+            </button>
+            <button onclick="removerContaSalva('${email}')" title="Remover e-mail" class="p-2.5 text-slate-400 hover:text-red-500 rounded-xl hover:bg-red-50">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          `;
+          container.appendChild(div);
+        });
+      } else {
+        blocoContas.classList.add('hidden');
+      }
+
+      document.getElementById('login-bridge-url').value = obterUrlPonteDrive();
+      if(document.getElementById('login-google-client-id')) document.getElementById('login-google-client-id').value = localStorage.getItem('linfa_gerais_oauth_client_id') || '';
+      voltarStep1Google();
+      abrirModal('modal-google', 'modal-google-box');
+      if(window.lucide) lucide.createIcons();
+    }
+
+    function preencherEmailParaConfirmacao(email) {
+      document.getElementById('manual-google-email').value = email;
+      solicitarConfirmacaoPorEmail();
+    }
+
+    function removerContaSalva(emailRemover) {
+      let contas = JSON.parse(localStorage.getItem("linfa_gerais_google_contas") || "[]");
+      contas = contas.filter(e => e !== emailRemover);
+      localStorage.setItem("linfa_gerais_google_contas", JSON.stringify(contas));
+      abrirSeletorGoogle();
+    }
+
+    function voltarStep1Google() {
+      document.getElementById('google-step-1').classList.remove('hidden');
+      document.getElementById('google-step-2').classList.add('hidden');
+      document.getElementById('input-codigo-verificacao').value = "";
+    }
+
+    async function solicitarConfirmacaoPorEmail() {
+      const email = document.getElementById('manual-google-email').value.trim();
+      const bridgeUrl = document.getElementById('login-bridge-url').value.trim();
+
+      if(!email || !email.includes('@')) {
+        return mostrarToast("Digite o seu endereço Gmail real.", "error");
+      }
+
+      if(bridgeUrl) {
+        localStorage.setItem("linfa_gerais_drive_bridge_url", bridgeUrl);
+      }
+
+      // Gera código de segurança de 6 dígitos
+      codigoGeradoAtual = String(Math.floor(100000 + Math.random() * 900000));
+      emailPendenteConfirmacao = email;
+
+      if(!bridgeUrl || !bridgeUrl.startsWith("https://script.google.com/")) {
+        return mostrarToast("Cole o Link da sua Ponte Google (Passo 2) para que o Google envie o e-mail real para sua caixa de entrada!", "error");
+      }
+
+      const btn = document.getElementById('btn-enviar-codigo-gmail');
+      const txtOrig = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> A enviar mensagem para o seu Gmail...`;
+      if(window.lucide) lucide.createIcons();
+
+      try {
+        const res = await fetch(bridgeUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "sendLoginCode",
+            email: email,
+            code: codigoGeradoAtual
+          })
+        });
+        const json = await res.json();
+        btn.disabled = false;
+        btn.innerHTML = txtOrig;
+
+        if(json && json.ok) {
+          document.getElementById('email-destino-label').textContent = email;
+          document.getElementById('google-step-1').classList.add('hidden');
+          document.getElementById('google-step-2').classList.remove('hidden');
+          mostrarToast("Mensagem enviada! Abra o seu Gmail para ver a confirmação.");
+          if(window.lucide) lucide.createIcons();
+        } else {
+          mostrarToast("Erro ao enviar e-mail: " + (json.error || "Verifique o código da Ponte."), "error");
+        }
+      } catch(err) {
+        btn.disabled = false;
+        btn.innerHTML = txtOrig;
+        mostrarToast("Não foi possível conectar à Ponte Google. Verifique se implantou como 'Qualquer pessoa'.", "error");
+      }
+    }
+
+    function loginOficialGoogleOAuth() {
+      const clientId = (document.getElementById('login-google-client-id').value || localStorage.getItem("linfa_gerais_oauth_client_id") || "").trim();
+      if(!clientId) {
+        return mostrarToast("Insira o seu Google OAuth Client ID ou utilize a Ponte Google acima.", "error");
+      }
+      localStorage.setItem("linfa_gerais_oauth_client_id", clientId);
+      if(!window.google || !window.google.accounts || !window.google.accounts.oauth2) {
+        return mostrarToast("A biblioteca OAuth da Google requer hospedagem HTTPS ativa.", "error");
+      }
+      const tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: "https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
+        callback: async (resp) => {
+          if(resp.error) return mostrarToast("Erro na autenticação Google: " + resp.error, "error");
+          sessionStorage.setItem("linfa_gerais_oauth_token", resp.access_token);
+          try {
+            const r = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+              headers: { "Authorization": "Bearer " + resp.access_token }
+            });
+            const perfil = await r.json();
+            const emailReal = perfil.email;
+            const nomeReal = perfil.name || emailReal.split('@')[0].toUpperCase();
+            let contas = JSON.parse(localStorage.getItem("linfa_gerais_google_contas") || "[]");
+            if(emailReal && !contas.includes(emailReal)) {
+              contas.unshift(emailReal);
+              localStorage.setItem("linfa_gerais_google_contas", JSON.stringify(contas));
+            }
+            fecharModal('modal-google');
+            let user = utilizadores.find(u => u.email.toLowerCase() === emailReal.toLowerCase());
+            if(!user) {
+              user = { nome: nomeReal, email: emailReal, pass: "google_oauth", viaGoogle: true };
+              utilizadores.push(user);
+              localStorage.setItem("linfa_gerais_users", JSON.stringify(utilizadores));
+            }
+            mostrarToast("Autenticado oficialmente via Google: " + emailReal);
+            iniciarSessaoComUsuario(user, true);
+          } catch(e) {
+            mostrarToast("Erro ao obter perfil Google.", "error");
+          }
+        }
+      });
+      tokenClient.requestAccessToken({ prompt: "consent" });
+    }
+
+    function validarCodigoRecebidoNoGmail() {
+      const digitado = document.getElementById('input-codigo-verificacao').value.trim();
+      if(!digitado || digitado !== codigoGeradoAtual) {
+        return mostrarToast("Código incorreto. Verifique o e-mail que chegou no seu Gmail.", "error");
+      }
+
+      let contas = JSON.parse(localStorage.getItem("linfa_gerais_google_contas") || "[]");
+      if(!contas.includes(emailPendenteConfirmacao)) {
+        contas.unshift(emailPendenteConfirmacao);
+        localStorage.setItem("linfa_gerais_google_contas", JSON.stringify(contas));
+      }
+
+      selecionarContaGoogle(emailPendenteConfirmacao);
+    }
+
+    function selecionarContaGoogle(email) {
+      fecharModal('modal-google');
+      let user = utilizadores.find(u => u.email.toLowerCase() === email.toLowerCase());
+      if(!user) {
+        user = { nome: email.split('@')[0].replace(/[._]/g, ' ').toUpperCase(), email: email, pass: "google_auth", viaGoogle: true };
+        utilizadores.push(user);
+        localStorage.setItem("linfa_gerais_users", JSON.stringify(utilizadores));
+      }
+      mostrarToast("Acesso confirmado com o Google!");
+      iniciarSessaoComUsuario(user, true);
+    }
+
+    function iniciarSessaoComUsuario(user, viaGoogle = false) {
+      user.viaGoogle = viaGoogle;
+      sessionStorage.setItem("linfa_gerais_session", JSON.stringify(user));
+      userLogado = user;
+      document.getElementById('auth-screen').style.opacity = '0';
+      setTimeout(async () => {
+        document.getElementById('auth-screen').style.display = 'none';
+        await carregarSistemaLogado();
+      }, 500);
+    }
+
+    function fazerLogout() {
+      sessionStorage.removeItem("linfa_gerais_session");
+      location.reload();
+    }
+
+    async function carregarSistemaLogado() {
+      document.getElementById('auth-screen').style.display = 'none';
+      document.getElementById('sidebar').classList.remove('hidden');
+      document.getElementById('main-content').classList.remove('hidden');
+      document.getElementById('nome-user-logado').textContent = userLogado.nome;
+      document.getElementById('avatar-user').textContent = userLogado.nome.substring(0,2).toUpperCase();
+      document.getElementById('status-conta-google').textContent = userLogado.email;
+
+      atualizarBadgeStatusPonte();
+
+      // 1. Carrega do IndexedDB (Ilimitado) ou migra do localStorage antigo se existir
+      const chaveUser = "linfa_gerais_db_" + userLogado.email;
+      let dadosIdb = await idbGet("pacientes_store", chaveUser);
+      if(!dadosIdb) {
+        const legado = localStorage.getItem(chaveUser);
+        if(legado) {
+          try {
+            dadosIdb = JSON.parse(legado);
+            await idbSet("pacientes_store", chaveUser, dadosIdb);
+          } catch(e) { dadosIdb = []; }
+        }
+      }
+      pacientesBanco = Array.isArray(dadosIdb) ? dadosIdb : [];
+      renderListaPacientes();
+
+      // 2. Se a Ponte Direta Google Drive estiver configurada, busca atualizações da nuvem automaticamente
+      if(obterUrlPonteDrive()) {
+        puxarDadosDoDrive(true);
+      }
+    }
+
+    function atualizarBadgeStatusPonte() {
+      const url = obterUrlPonteDrive();
+      const estadoTxt = document.getElementById('estado-nuvem-texto');
+      if(url) {
+        estadoTxt.textContent = "Drive Conectado";
+        estadoTxt.className = "font-bold text-emerald-600";
+      } else {
+        estadoTxt.textContent = "Configurar Link";
+        estadoTxt.className = "font-bold text-amber-600";
+      }
+    }
+
+    async function salvarBanco(sincronizarNuvem = true) {
+      const chaveUser = "linfa_gerais_db_" + userLogado.email;
+      await idbSet("pacientes_store", chaveUser, pacientesBanco);
+
+      // Se tiver Ponte Google Drive configurada, sincroniza o banco em segundo plano
+      if(sincronizarNuvem && obterUrlPonteDrive()) {
+        enviarBancoParaPonteDrive(true);
+      }
+    }
+
+    // ================= COMUNICAÇÃO COM A PONTE DIRETA GOOGLE DRIVE (APPS SCRIPT) =================
+    async function enviarFotoParaDrive(base64Data, pacienteNome, dataRegisto, indiceFoto) {
+      const bridgeUrl = obterUrlPonteDrive();
+      if(!bridgeUrl) return null;
+
+      try {
+        const payload = {
+          action: "uploadPhoto",
+          pacienteNome: pacienteNome || "Paciente",
+          dataRegisto: dataRegisto || new Date().toISOString().split('T')[0],
+          nomeArquivo: `${dataRegisto}_Foto_${indiceFoto}.jpg`,
+          base64: base64Data
+        };
+
+        const res = await fetch(bridgeUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if(json && json.ok && json.fileId) {
+          // Guarda em cache local no IndexedDB pelo fileId para abrir instantaneamente
+          await idbSet("fotos_cache", json.fileId, base64Data);
+          return {
+            fileId: json.fileId,
+            viewUrl: json.viewUrl || `https://lh3.googleusercontent.com/d/${json.fileId}=w1000`,
+            webViewLink: json.webViewLink || `https://drive.google.com/file/d/${json.fileId}/view`,
+            folderUrl: json.folderUrl || ""
+          };
+        }
+      } catch(err) {
+        console.warn("Falha ao enviar foto individual para o Drive:", err);
+      }
+      return null;
+    }
+
+    // Prepara uma cópia leve do banco para salvar no JSON do Drive (sem duplicar Base64 de fotos que já têm fileId no Drive)
+    function gerarBancoLeveParaDrive() {
+      return pacientesBanco.map(p => {
+        const pacCopia = { ...p };
+        if(pacCopia.imgCapaDriveId) {
+          pacCopia.imgCapa = pacCopia.imgCapaViewUrl || `https://lh3.googleusercontent.com/d/${pacCopia.imgCapaDriveId}=w1000`;
+        }
+        pacCopia.evolucoes = (p.evolucoes || []).map(ev => {
+          const evCopia = { ...ev };
+          evCopia.fotos = (ev.fotos || []).map(f => {
+            if(typeof f === 'object' && f.fileId) {
+              return {
+                fileId: f.fileId,
+                viewUrl: f.viewUrl || `https://lh3.googleusercontent.com/d/${f.fileId}=w1000`,
+                webViewLink: f.webViewLink || `https://drive.google.com/file/d/${f.fileId}/view`
+              };
+            }
+            return f;
+          });
+          return evCopia;
+        });
+        return pacCopia;
+      });
+    }
+
+    async function enviarBancoParaPonteDrive(silencioso = false) {
+      const bridgeUrl = obterUrlPonteDrive();
+      if(!bridgeUrl) {
+        if(!silencioso) {
+          mostrarToast("Configure o Link da Ponte Google Drive nas definições!", "error");
+          abrirConfiguracoes();
+        }
+        return;
+      }
+
+      const estadoTxt = document.getElementById('estado-nuvem-texto');
+      if(estadoTxt) {
+        estadoTxt.textContent = "A sincronizar...";
+        estadoTxt.className = "font-bold text-blue-600";
+      }
+
+      try {
+        // Se houver fotos locais ainda sem fileId no Drive, envia-as primeiro
+        if(!silencioso) mostrarToast("A enviar fotos e fichas para o Google Drive...");
+        for(const p of pacientesBanco) {
+          for(const ev of (p.evolucoes || [])) {
+            const novasFotos = [];
+            for(let i = 0; i < (ev.fotos || []).length; i++) {
+              const f = ev.fotos[i];
+              if(typeof f === 'string' && f.startsWith('data:image')) {
+                const up = await enviarFotoParaDrive(f, p.nome, ev.data, i + 1);
+                if(up) {
+                  if(up.folderUrl) p.pastaDriveUrl = up.folderUrl;
+                  novasFotos.push(up);
+                } else {
+                  novasFotos.push(f);
+                }
+              } else {
+                novasFotos.push(f);
+              }
+            }
+            ev.fotos = novasFotos;
+          }
+        }
+
+        const bancoLeve = gerarBancoLeveParaDrive();
+        const res = await fetch(bridgeUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "saveDatabase",
+            contaGoogle: userLogado.email,
+            pacientes: bancoLeve
+          })
+        });
+        const json = await res.json();
+        if(json && json.ok) {
+          await idbSet("pacientes_store", "linfa_gerais_db_" + userLogado.email, pacientesBanco);
+          const hora = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+          if(estadoTxt) {
+            estadoTxt.textContent = `No Drive (${hora})`;
+            estadoTxt.className = "font-bold text-emerald-600";
+          }
+          if(!silencioso) mostrarToast("Tudo guardado diretamente no seu Google Drive!");
+          if(pacienteAtualId) renderMapaTimeline();
+        } else {
+          throw new Error(json.error || "Erro desconhecido");
+        }
+      } catch(err) {
+        if(estadoTxt) {
+          estadoTxt.textContent = "Erro na Ponte";
+          estadoTxt.className = "font-bold text-red-500";
+        }
+        if(!silencioso) mostrarToast("Não foi possível comunicar com a Ponte do Drive. Verifique o link.", "error");
+      }
+    }
+
+    async function puxarDadosDoDrive(silencioso = false) {
+      const bridgeUrl = obterUrlPonteDrive();
+      if(!bridgeUrl) {
+        if(!silencioso) {
+          mostrarToast("Cole o Link da Ponte Google Drive para carregar da nuvem.", "error");
+          abrirConfiguracoes();
+        }
+        return;
+      }
+
+      if(!silencioso) mostrarToast("A buscar pacientes e fotos no Google Drive...");
+      try {
+        const res = await fetch(bridgeUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action: "loadDatabase" })
+        });
+        const json = await res.json();
+        if(json && json.ok && Array.isArray(json.pacientes)) {
+          if(json.pacientes.length > 0 || pacientesBanco.length === 0) {
+            pacientesBanco = json.pacientes;
+            await salvarBanco(false);
+            renderListaPacientes();
+            if(pacienteAtualId) abrirFicha(pacienteAtualId);
+          }
+          const estadoTxt = document.getElementById('estado-nuvem-texto');
+          if(estadoTxt) {
+            estadoTxt.textContent = "Drive Sincronizado";
+            estadoTxt.className = "font-bold text-emerald-600";
+          }
+          if(!silencioso) mostrarToast(`${pacientesBanco.length} paciente(s) carregado(s) do Google Drive!`);
+        }
+      } catch(err) {
+        if(!silencioso) mostrarToast("Erro ao carregar do Google Drive. Verifique a ligação.", "error");
+      }
+    }
+
+    async function testarConexaoDrive() {
+      const inputUrl = document.getElementById('cfg-drive-bridge-url').value.trim();
+      if(!inputUrl || !inputUrl.startsWith("https://script.google.com/")) {
+        return mostrarToast("Cole um link válido do Google Apps Script (terminado em /exec).", "error");
+      }
+      localStorage.setItem("linfa_gerais_drive_bridge_url", inputUrl);
+      mostrarToast("A testar ligação com o seu Google Drive...");
+      try {
+        const res = await fetch(inputUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action: "ping" })
+        });
+        const json = await res.json();
+        if(json && json.ok) {
+          atualizarBadgeStatusPonte();
+          mostrarToast("Ponte Google Drive conectada com sucesso! Pasta criada no seu Drive.");
+        } else {
+          mostrarToast("A ponte respondeu com erro: " + (json.error || ""), "error");
+        }
+      } catch(e) {
+        mostrarToast("Falha ao conectar. Confirme se implantou como 'Qualquer pessoa'.", "error");
+      }
+    }
+
+    // Fallback inteligente: se uma imagem do Drive não abrir via link direto lh3, puxa via Ponte Apps Script e guarda no cache IndexedDB
+    async function recarregarImagemViaPonte(imgEl, fileId) {
+      if(!fileId || imgEl.dataset.tentouPonte === "1") return;
+      imgEl.dataset.tentouPonte = "1";
+
+      // 1. Verifica primeiro se já está no cache IndexedDB local
+      const cacheLocal = await idbGet("fotos_cache", fileId);
+      if(cacheLocal) {
+        imgEl.src = cacheLocal;
+        return;
+      }
+
+      // 2. Busca o Base64 direto do Google Drive através da Ponte
+      const bridgeUrl = obterUrlPonteDrive();
+      if(!bridgeUrl) return;
+      try {
+        const res = await fetch(bridgeUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action: "getPhotoBase64", fileId: fileId })
+        });
+        const json = await res.json();
+        if(json && json.ok && json.base64) {
+          await idbSet("fotos_cache", fileId, json.base64);
+          imgEl.src = json.base64;
+        }
+      } catch(e) {
+        console.warn("Não foi possível carregar a foto via ponte:", fileId);
+      }
+    }
+
+    // Auxiliar para extrair URL de exibição e FileId de qualquer item de foto (string ou objeto Drive)
+    function extrairDadosFoto(itemFoto) {
+      if(!itemFoto) return { src: "", fileId: "", webViewLink: "", isDrive: false };
+      if(typeof itemFoto === "string") {
+        return { src: itemFoto, fileId: "", webViewLink: "", isDrive: itemFoto.includes("googleusercontent.com") };
+      }
+      return {
+        src: itemFoto.src || itemFoto.viewUrl || `https://lh3.googleusercontent.com/d/${itemFoto.fileId}=w1000`,
+        fileId: itemFoto.fileId || "",
+        webViewLink: itemFoto.webViewLink || (itemFoto.fileId ? `https://drive.google.com/file/d/${itemFoto.fileId}/view` : ""),
+        isDrive: Boolean(itemFoto.fileId)
+      };
+    }
+
+    // ================= GESTÃO DE PACIENTES =================
+    function formatarDataBR(dataISO) {
+      if(!dataISO) return "Sem data";
+      const partes = dataISO.split('-');
+      if(partes.length !== 3) return dataISO;
+      return `${partes[2]}/${partes[1]}/${partes[0]}`;
+    }
+
+    function renderListaPacientes() {
+      const busca = document.getElementById("buscaPaciente").value.toLowerCase();
+      const container = document.getElementById("listaPacientes");
+      document.getElementById('contador-pacientes').textContent = pacientesBanco.length;
+      container.innerHTML = "";
+
+      pacientesBanco.filter(p => p.nome.toLowerCase().includes(busca)).forEach(p => {
+        const div = document.createElement("div");
+        const act = p.id === pacienteAtualId;
+        const qtdEv = (p.evolucoes || []).length;
+        const fotoCapaUrl = obterFotoPrincipalPaciente(p);
+
+        const avatarHtml = fotoCapaUrl
+          ? `<img src="${fotoCapaUrl}" class="w-10 h-10 rounded-xl object-cover border ${act ? 'border-white' : 'border-slate-200'}">`
+          : `<div class="w-10 h-10 rounded-xl flex justify-center items-center font-extrabold text-xs ${act ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'}">${p.nome.charAt(0).toUpperCase()}</div>`;
+
+        div.className = `p-3 rounded-2xl cursor-pointer transition-all border ${act ? 'bg-brand text-white shadow-md border-transparent' : 'bg-white text-slate-700 border-slate-100 hover:border-slate-300'}`;
+        div.onclick = () => abrirFicha(p.id);
+        div.innerHTML = `
+          <div class="flex items-center gap-3">
+            ${avatarHtml}
+            <div class="flex-1 min-w-0">
+              <p class="font-bold text-sm truncate">${p.nome}</p>
+              <p class="text-[10px] font-medium truncate ${act ? 'text-emerald-100' : 'text-slate-400'}">
+                Início: ${formatarDataBR(p.dataInicio)} • ${qtdEv} registo(s)
+              </p>
+            </div>
+          </div>`;
+        container.appendChild(div);
+      });
+    }
+
+    function obterFotoPrincipalPaciente(p) {
+      if(p.imgCapa) return p.imgCapa;
+      if(p.evolucoes && p.evolucoes.length > 0) {
+        for(let i = p.evolucoes.length - 1; i >= 0; i--) {
+          if(p.evolucoes[i].fotos && p.evolucoes[i].fotos.length > 0) {
+            return extrairDadosFoto(p.evolucoes[i].fotos[0]).src;
+          }
+        }
+      }
+      return "";
+    }
+
+    async function criarNovoPaciente() {
+      const nome = document.getElementById('novo-pac-nome').value.trim();
+      const dataInicio = document.getElementById('novo-pac-data').value || new Date().toISOString().split('T')[0];
+      const localFerida = document.getElementById('novo-pac-local').value.trim();
+      if(!nome) return mostrarToast("Insira o nome do paciente.", "error");
+
+      const novoPac = {
+        id: "pac_" + Date.now(),
+        nome: nome,
+        dataInicio: dataInicio,
+        localFerida: localFerida,
+        imgCapa: "",
+        pastaDriveUrl: "",
+        idade: "",
+        cpf: "",
+        contacto: "",
+        comorbilidades: "",
+        evolucoes: []
+      };
+
+      pacientesBanco.unshift(novoPac);
+      await salvarBanco();
+      document.getElementById('novo-pac-nome').value = "";
+      document.getElementById('novo-pac-local').value = "";
+      fecharModal('modal-novo-paciente');
+      abrirFicha(novoPac.id);
+      mostrarToast("Paciente criado! Adicione as fotos na Linha do Tempo.");
+    }
+
+    function abrirFicha(id) {
+      pacienteAtualId = id;
+      const p = pacientesBanco.find(x => x.id === id);
+      if(!p) return;
+      if(!p.evolucoes) p.evolucoes = [];
+
+      document.getElementById('estadoVazio').classList.add('hidden');
+      document.getElementById('fichaPaciente').classList.remove('hidden');
+
+      document.getElementById('pacNomeTopo').value = p.nome;
+      document.getElementById('pacDataInicio').value = p.dataInicio || "";
+      document.getElementById('pacLocalFerida').value = p.localFerida || "";
+      document.getElementById('contador-evolucoes-topo').textContent = `${p.evolucoes.length} Registo(s) na Linha do Tempo`;
+
+      const linkPasta = document.getElementById('link-pasta-drive-paciente');
+      if(p.pastaDriveUrl) {
+        linkPasta.href = p.pastaDriveUrl;
+        linkPasta.classList.remove('hidden');
+      } else {
+        linkPasta.classList.add('hidden');
+      }
+
+      atualizarFotoCapaUI(p);
+
+      document.getElementById('pacNome').value = p.nome;
+      document.getElementById('pacIdade').value = p.idade || "";
+      document.getElementById('pacCpf').value = p.cpf || "";
+      document.getElementById('pacContacto').value = p.contacto || "";
+      document.getElementById('pacComorbilidades').value = p.comorbilidades || "";
+
+      limparFormularioEvolucao();
+      renderMapaTimeline();
+      mudarAba('timeline');
+      renderListaPacientes();
+    }
+
+    function atualizarFotoCapaUI(p) {
+      const imgCapa = document.getElementById('imgCapaPaciente');
+      const iniciais = document.getElementById('iniciaisPaciente');
+      const fotoMostrar = obterFotoPrincipalPaciente(p);
+
+      if(fotoMostrar) {
+        imgCapa.src = fotoMostrar;
+        imgCapa.classList.remove('hidden');
+        iniciais.classList.add('hidden');
+      } else {
+        imgCapa.src = "";
+        imgCapa.classList.add('hidden');
+        iniciais.classList.remove('hidden');
+        iniciais.textContent = p.nome.substring(0,2).toUpperCase();
+      }
+    }
+
+    function alterarFotoCapa(event) {
+      const file = event.target.files[0];
+      if(!file) return;
+      comprimirImagem(file, async (base64) => {
+        const p = pacientesBanco.find(x => x.id === pacienteAtualId);
+        if(!p) return;
+        p.imgCapa = base64;
+        if(obterUrlPonteDrive()) {
+          const up = await enviarFotoParaDrive(base64, p.nome, "Foto_Capa", 1);
+          if(up) {
+            p.imgCapaDriveId = up.fileId;
+            p.imgCapaViewUrl = up.viewUrl;
+            p.imgCapa = up.viewUrl;
+            if(up.folderUrl) p.pastaDriveUrl = up.folderUrl;
+          }
+        }
+        await salvarBanco();
+        atualizarFotoCapaUI(p);
+        renderListaPacientes();
+        mostrarToast("Foto principal atualizada!");
+      });
+    }
+
+    function sincronizarNomeTopo() {
+      const val = document.getElementById('pacNomeTopo').value;
+      document.getElementById('pacNome').value = val;
+      salvarPacienteAtual(true);
+    }
+
+    function sincronizarNome() {
+      const val = document.getElementById('pacNome').value;
+      document.getElementById('pacNomeTopo').value = val;
+    }
+
+    async function salvarPacienteAtual(silencioso = false) {
+      const p = pacientesBanco.find(x => x.id === pacienteAtualId);
+      if(!p) return;
+      p.nome = document.getElementById('pacNomeTopo').value || document.getElementById('pacNome').value || "Paciente";
+      p.dataInicio = document.getElementById('pacDataInicio').value;
+      p.localFerida = document.getElementById('pacLocalFerida').value;
+      p.idade = document.getElementById('pacIdade').value;
+      p.cpf = document.getElementById('pacCpf').value;
+      p.contacto = document.getElementById('pacContacto').value;
+      p.comorbilidades = document.getElementById('pacComorbilidades').value;
+
+      await salvarBanco();
+      renderListaPacientes();
+      renderMapaTimeline();
+      if(!silencioso) mostrarToast("Dados do paciente guardados!");
+    }
+
+    async function confirmarExclusao() {
+      if(confirm("EXCLUIR PACIENTE? Esta ação apagará a ficha deste paciente.")) {
+        pacientesBanco = pacientesBanco.filter(x => x.id !== pacienteAtualId);
+        await salvarBanco();
+        pacienteAtualId = null;
+        document.getElementById('fichaPaciente').classList.add('hidden');
+        document.getElementById('estadoVazio').classList.remove('hidden');
+        renderListaPacientes();
+        mostrarToast("Paciente excluído.");
+      }
+    }
+
+    // ================= MAPA DA LINHA DO TEMPO (CARREGAMENTO DIRETO DO DRIVE) =================
+    function ordenarEvolucoesCronologicamente(evolucoes) {
+      return evolucoes.sort((a, b) => {
+        const dataA = `${a.data || '1970-01-01'}T${a.hora || '00:00'}`;
+        const dataB = `${b.data || '1970-01-01'}T${b.hora || '00:00'}`;
+        return dataA.localeCompare(dataB);
+      });
+    }
+
+    function calcularDiferencaDias(dataInicialISO, dataAtualISO) {
+      if(!dataInicialISO || !dataAtualISO) return null;
+      const d1 = new Date(dataInicialISO + "T00:00:00");
+      const d2 = new Date(dataAtualISO + "T00:00:00");
+      const diff = Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+      return isNaN(diff) ? null : diff;
+    }
+
+    function renderMapaTimeline() {
+      const p = pacientesBanco.find(x => x.id === pacienteAtualId);
+      if(!p) return;
+      const trilho = document.getElementById('trilho-cronologico');
+      trilho.innerHTML = "";
+
+      p.evolucoes = ordenarEvolucoesCronologicamente(p.evolucoes || []);
+      document.getElementById('contador-evolucoes-topo').textContent = `${p.evolucoes.length} Registo(s) na Linha do Tempo`;
+
+      if(p.evolucoes.length === 0) {
+        trilho.innerHTML = `
+          <div class="w-full py-12 px-6 text-center flex flex-col items-center justify-center">
+            <div class="w-16 h-16 rounded-2xl bg-emerald-50 text-brand flex items-center justify-center mb-3">
+              <i data-lucide="camera" class="w-8 h-8"></i>
+            </div>
+            <h4 class="text-base font-extrabold text-slate-700">Linha do Tempo Vazia</h4>
+            <p class="text-xs text-slate-500 max-w-md mt-1 mb-4">Adicione a primeira evolução com fotos. Elas serão salvas no seu Google Drive e exibidas aqui em ordem cronológica.</p>
+            <button onclick="irParaNovaEvolucao()" class="bg-brand text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-md flex items-center gap-2">
+              <i data-lucide="plus" class="w-4 h-4"></i> Adicionar 1º Dia na Linha do Tempo
+            </button>
+          </div>`;
+        if(window.lucide) lucide.createIcons();
+        return;
+      }
+
+      const dataBase = p.dataInicio || p.evolucoes[0].data;
+
+      p.evolucoes.forEach((ev, idx) => {
+        const diasCorridos = calcularDiferencaDias(dataBase, ev.data);
+        const badgeDia = diasCorridos !== null && diasCorridos >= 0 ? `Dia ${diasCorridos}` : `${idx + 1}º Registo`;
+        const fotos = ev.fotos || [];
+
+        let galeriaHtml = "";
+        if(fotos.length > 0) {
+          const gridCols = fotos.length === 1 ? "grid-cols-1" : "grid-cols-2";
+          galeriaHtml = `<div class="grid ${gridCols} gap-2 mb-3">`;
+          fotos.forEach((fItem, fIdx) => {
+            const info = extrairDadosFoto(fItem);
+            const badgeDrive = info.isDrive
+              ? `<span class="absolute top-1.5 left-1.5 bg-emerald-600/90 text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded flex items-center gap-0.5 shadow"><i data-lucide="cloud" class="w-2.5 h-2.5"></i> Drive</span>`
+              : ``;
+            const onErrorAttr = info.fileId ? `onerror="recarregarImagemViaPonte(this, '${info.fileId}')"` : ``;
+
+            galeriaHtml += `
+              <div class="relative group overflow-hidden rounded-xl border border-slate-200 cursor-pointer bg-slate-100" onclick="abrirLightbox('${ev.id}', ${fIdx})">
+                ${badgeDrive}
+                <img src="${info.src}" ${onErrorAttr} class="${fotos.length === 1 ? 'h-44' : 'h-28'} w-full object-cover group-hover:scale-105 transition-transform duration-300">
+                <span class="absolute bottom-1.5 right-1.5 bg-slate-900/75 text-white text-[9px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
+                  <i data-lucide="maximize-2" class="w-2.5 h-2.5"></i> Foto ${fIdx + 1}
+                </span>
+              </div>`;
+          });
+          galeriaHtml += `</div>`;
+        } else {
+          galeriaHtml = `
+            <div class="h-28 rounded-xl bg-slate-100 border border-dashed border-slate-300 flex items-center justify-center text-xs font-bold text-slate-400 mb-3">
+              Sem fotografia neste dia
+            </div>`;
+        }
+
+        const card = document.createElement('div');
+        card.className = "w-[310px] shrink-0 bg-white rounded-2xl border-2 border-slate-200 hover:border-emerald-500 shadow-sm hover:shadow-xl transition-all p-5 flex flex-col justify-between relative";
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-3 pb-2.5 border-b border-slate-100">
+              <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-lg bg-brand text-white font-extrabold text-xs flex items-center justify-center shadow-sm">${idx + 1}</span>
+                <div>
+                  <p class="text-xs font-extrabold text-slate-800">${formatarDataBR(ev.data)}</p>
+                  <p class="text-[10px] font-bold text-brand uppercase">${badgeDia} ${ev.hora ? '• ' + ev.hora : ''}</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-1 no-print">
+                <button onclick="editarEvolucao('${ev.id}')" title="Editar este dia" class="p-1.5 rounded-lg bg-slate-100 hover:bg-amber-100 text-slate-600 hover:text-amber-700 transition-colors">
+                  <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="excluirEvolucao('${ev.id}')" title="Excluir este dia" class="p-1.5 rounded-lg bg-slate-100 hover:bg-red-100 text-slate-600 hover:text-red-600 transition-colors">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+
+            ${galeriaHtml}
+
+            <div class="space-y-1.5 mb-2">
+              ${ev.tecido ? `<div class="text-[11px] bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-lg font-bold"><span class="uppercase text-[9px] text-emerald-600 block">Tecido / Aspeto:</span> ${ev.tecido}</div>` : ''}
+              ${ev.medidas ? `<div class="text-[11px] bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg font-bold"><span class="uppercase text-[9px] text-slate-400 block">Medidas:</span> ${ev.medidas}</div>` : ''}
+            </div>
+
+            <p class="text-xs text-slate-600 font-medium leading-relaxed whitespace-pre-line">${ev.conduta || 'Sem anotações adicionais.'}</p>
+          </div>
+
+          <div class="pt-3 mt-3 border-t border-slate-100 flex justify-between items-center text-[10px] font-bold text-slate-400">
+            <span>${fotos.length} foto(s)</span>
+            <button onclick="editarEvolucao('${ev.id}')" class="text-brand hover:underline no-print">Editar registo →</button>
+          </div>
+        `;
+        trilho.appendChild(card);
+      });
+
+      if(window.lucide) lucide.createIcons();
+    }
+
+    function configurarArrasteMapa() {
+      const mapa = document.getElementById('mapa-timeline');
+      if(!mapa) return;
+      let isDown = false;
+      let startX;
+      let scrollLeft;
+
+      mapa.addEventListener('mousedown', (e) => {
+        if(e.target.closest('button') || e.target.closest('img')) return;
+        isDown = true;
+        startX = e.pageX - mapa.offsetLeft;
+        scrollLeft = mapa.scrollLeft;
+      });
+      mapa.addEventListener('mouseleave', () => { isDown = false; });
+      mapa.addEventListener('mouseup', () => { isDown = false; });
+      mapa.addEventListener('mousemove', (e) => {
+        if(!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - mapa.offsetLeft;
+        const walk = (x - startX) * 1.6;
+        mapa.scrollLeft = scrollLeft - walk;
+      });
+    }
+
+    function moverMapaTimeline(delta) {
+      const mapa = document.getElementById('mapa-timeline');
+      if(mapa) mapa.scrollBy({ left: delta, behavior: 'smooth' });
+    }
+
+    // ================= ALIMENTAR O SISTEMA (UPLOAD DIRETO PARA PASTAS DO DRIVE) =================
+    function comprimirImagem(file, callback) {
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          const maxW = 1000;
+          const scale = img.width > maxW ? maxW / img.width : 1;
+          canvas.width = img.width * scale;
+          canvas.height = img.height * scale;
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          callback(canvas.toDataURL('image/jpeg', 0.80));
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function adicionarFotosAoLote(event) {
+      const files = Array.from(event.target.files || []);
+      if(files.length === 0) return;
+
+      let processadas = 0;
+      files.forEach(file => {
+        comprimirImagem(file, (base64) => {
+          fotosLoteAtual.push(base64);
+          processadas++;
+          if(processadas === files.length) {
+            renderPreviewLoteFotos();
+            mostrarToast(`${files.length} foto(s) pronta(s) para envio!`);
+          }
+        });
+      });
+      event.target.value = "";
+    }
+
+    function renderPreviewLoteFotos() {
+      const galeria = document.getElementById('galeriaPreviewLote');
+      galeria.innerHTML = "";
+      fotosLoteAtual.forEach((item, idx) => {
+        const info = extrairDadosFoto(item);
+        const div = document.createElement('div');
+        div.className = "relative group rounded-xl overflow-hidden border border-slate-200 h-24 bg-slate-100 shadow-sm";
+        div.innerHTML = `
+          <img src="${info.src}" class="w-full h-full object-cover">
+          <button onclick="removerFotoDoLote(${idx})" title="Remover foto" class="absolute top-1 right-1 bg-red-600 text-white rounded-lg p-1 shadow-md hover:bg-red-700">
+            <i data-lucide="x" class="w-3 h-3"></i>
+          </button>
+          <span class="absolute bottom-1 left-1 bg-slate-900/70 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">#${idx + 1}</span>
+        `;
+        galeria.appendChild(div);
+      });
+      if(window.lucide) lucide.createIcons();
+    }
+
+    function removerFotoDoLote(idx) {
+      fotosLoteAtual.splice(idx, 1);
+      renderPreviewLoteFotos();
+    }
+
+    function irParaNovaEvolucao() {
+      limparFormularioEvolucao();
+      mudarAba('alimentar');
+    }
+
+    function limparFormularioEvolucao() {
+      document.getElementById('evIdEdicao').value = "";
+      document.getElementById('evData').value = new Date().toISOString().split('T')[0];
+      document.getElementById('evHora').value = new Date().toTimeString().slice(0,5);
+      document.getElementById('evTecido').value = "";
+      document.getElementById('evMedidas').value = "";
+      document.getElementById('evConduta').value = "";
+      fotosLoteAtual = [];
+      renderPreviewLoteFotos();
+
+      document.getElementById('badge-modo-edicao').classList.add('hidden');
+      document.getElementById('btn-cancelar-edicao').classList.add('hidden');
+      document.getElementById('titulo-form-evolucao').innerHTML = `<i data-lucide="plus-square" class="w-5 h-5 text-brand"></i> Alimentar Linha do Tempo (Novo Registo)`;
+      if(window.lucide) lucide.createIcons();
+    }
+
+    async function guardarEvolucaoNaTimeline() {
+      const p = pacientesBanco.find(x => x.id === pacienteAtualId);
+      if(!p) return;
+
+      const data = document.getElementById('evData').value;
+      const hora = document.getElementById('evHora').value;
+      const tecido = document.getElementById('evTecido').value.trim();
+      const medidas = document.getElementById('evMedidas').value.trim();
+      const conduta = document.getElementById('evConduta').value.trim();
+      const idEdicao = document.getElementById('evIdEdicao').value;
+
+      if(!data) return mostrarToast("Selecione a data do registo.", "error");
+      if(fotosLoteAtual.length === 0 && !conduta && !tecido) {
+        return mostrarToast("Adicione pelo menos uma foto ou anotação da evolução.", "error");
+      }
+
+      const btn = document.getElementById('btn-guardar-evolucao');
+      const textoOriginalBtn = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> A guardar no Google Drive...`;
+      if(window.lucide) lucide.createIcons();
+
+      // Se a Ponte Google Drive estiver ativa, envia cada foto nova diretamente para a pasta do paciente no Drive
+      const fotosProcessadas = [];
+      const temPonte = Boolean(obterUrlPonteDrive());
+
+      for(let i = 0; i < fotosLoteAtual.length; i++) {
+        const item = fotosLoteAtual[i];
+        if(temPonte && typeof item === "string" && item.startsWith("data:image")) {
+          const resultadoDrive = await enviarFotoParaDrive(item, p.nome, data, i + 1);
+          if(resultadoDrive) {
+            if(resultadoDrive.folderUrl) p.pastaDriveUrl = resultadoDrive.folderUrl;
+            fotosProcessadas.push(resultadoDrive);
+          } else {
+            fotosProcessadas.push(item);
+          }
+        } else {
+          fotosProcessadas.push(item);
+        }
+      }
+
+      if(!p.evolucoes) p.evolucoes = [];
+
+      if(idEdicao) {
+        const index = p.evolucoes.findIndex(e => e.id === idEdicao);
+        if(index !== -1) {
+          p.evolucoes[index] = {
+            ...p.evolucoes[index],
+            data, hora, tecido, medidas, conduta,
+            fotos: fotosProcessadas
+          };
+        }
+        mostrarToast("Registo atualizado e sincronizado!");
+      } else {
+        p.evolucoes.push({
+          id: "ev_" + Date.now(),
+          data, hora, tecido, medidas, conduta,
+          fotos: fotosProcessadas
+        });
+        mostrarToast(temPonte ? "Fotos guardadas no Google Drive e Linha do Tempo!" : "Evolução guardada na Linha do Tempo!");
+      }
+
+      p.evolucoes = ordenarEvolucoesCronologicamente(p.evolucoes);
+      if(!p.dataInicio && p.evolucoes.length > 0) {
+        p.dataInicio = p.evolucoes[0].data;
+        document.getElementById('pacDataInicio').value = p.dataInicio;
+      }
+
+      await salvarBanco(true);
+      btn.disabled = false;
+      btn.innerHTML = textoOriginalBtn;
+
+      const linkPasta = document.getElementById('link-pasta-drive-paciente');
+      if(p.pastaDriveUrl) {
+        linkPasta.href = p.pastaDriveUrl;
+        linkPasta.classList.remove('hidden');
+      }
+
+      atualizarFotoCapaUI(p);
+      renderListaPacientes();
+      renderMapaTimeline();
+      limparFormularioEvolucao();
+      mudarAba('timeline');
+    }
+
+    function editarEvolucao(evId) {
+      const p = pacientesBanco.find(x => x.id === pacienteAtualId);
+      if(!p) return;
+      const ev = (p.evolucoes || []).find(e => e.id === evId);
+      if(!ev) return;
+
+      document.getElementById('evIdEdicao').value = ev.id;
+      document.getElementById('evData').value = ev.data || "";
+      document.getElementById('evHora').value = ev.hora || "";
+      document.getElementById('evTecido').value = ev.tecido || "";
+      document.getElementById('evMedidas').value = ev.medidas || "";
+      document.getElementById('evConduta').value = ev.conduta || "";
+      fotosLoteAtual = [...(ev.fotos || [])];
+      renderPreviewLoteFotos();
+
+      document.getElementById('badge-modo-edicao').classList.remove('hidden');
+      document.getElementById('btn-cancelar-edicao').classList.remove('hidden');
+      document.getElementById('titulo-form-evolucao').innerHTML = `<i data-lucide="pencil" class="w-5 h-5 text-amber-600"></i> A Editar Registo de ${formatarDataBR(ev.data)}`;
+      if(window.lucide) lucide.createIcons();
+      mudarAba('alimentar');
+    }
+
+    async function excluirEvolucao(evId) {
+      if(!confirm("Deseja eliminar este dia da linha do tempo?")) return;
+      const p = pacientesBanco.find(x => x.id === pacienteAtualId);
+      if(!p) return;
+      p.evolucoes = (p.evolucoes || []).filter(e => e.id !== evId);
+      await salvarBanco(true);
+      atualizarFotoCapaUI(p);
+      renderMapaTimeline();
+      renderListaPacientes();
+      mostrarToast("Registo removido da linha do tempo.");
+    }
+
+    // ================= LIGHTBOX (VISUALIZADOR COM LINK DIRETO PARA O DRIVE) =================
+    function abrirLightbox(evId, imgIndex) {
+      const p = pacientesBanco.find(x => x.id === pacienteAtualId);
+      if(!p) return;
+      const ev = (p.evolucoes || []).find(e => e.id === evId);
+      if(!ev || !ev.fotos || ev.fotos.length === 0) return;
+
+      lightboxFotos = ev.fotos;
+      lightboxIndex = imgIndex;
+
+      document.getElementById('lightbox-data').textContent = `${formatarDataBR(ev.data)} ${ev.hora ? '• ' + ev.hora : ''}`;
+      document.getElementById('lightbox-titulo').textContent = `${p.nome} — ${ev.tecido || 'Evolução de Ferida'} ${ev.medidas ? '(' + ev.medidas + ')' : ''}`;
+      document.getElementById('lightbox-legenda').textContent = ev.conduta || "Sem observações clínicas registadas para esta imagem.";
+
+      atualizarImagemLightbox();
+      const modal = document.getElementById('modal-lightbox');
+      modal.classList.remove('hidden');
+      setTimeout(() => modal.classList.remove('opacity-0'), 10);
+    }
+
+    function atualizarImagemLightbox() {
+      const info = extrairDadosFoto(lightboxFotos[lightboxIndex]);
+      const imgEl = document.getElementById('lightbox-img');
+      imgEl.dataset.tentouPonte = "0";
+      imgEl.src = info.src;
+      if(info.fileId) {
+        imgEl.onerror = () => recarregarImagemViaPonte(imgEl, info.fileId);
+      }
+
+      const linkDrive = document.getElementById('lightbox-link-drive');
+      if(info.webViewLink) {
+        linkDrive.href = info.webViewLink;
+        linkDrive.classList.remove('hidden');
+      } else {
+        linkDrive.classList.add('hidden');
+      }
+
+      document.getElementById('lightbox-contador').textContent = `Foto ${lightboxIndex + 1} de ${lightboxFotos.length}`;
+      document.getElementById('btn-lb-ant').style.visibility = lightboxFotos.length > 1 ? 'visible' : 'hidden';
+      document.getElementById('btn-lb-prox').style.visibility = lightboxFotos.length > 1 ? 'visible' : 'hidden';
+    }
+
+    function navegarLightbox(dir) {
+      lightboxIndex = (lightboxIndex + dir + lightboxFotos.length) % lightboxFotos.length;
+      atualizarImagemLightbox();
+    }
+
+    function fecharLightbox() {
+      const modal = document.getElementById('modal-lightbox');
+      modal.classList.add('opacity-0');
+      setTimeout(() => modal.classList.add('hidden'), 300);
+    }
+
+    // ================= SINCRONIZAÇÃO E BACKUP =================
+    function sincronizarComDrive() {
+      if(obterUrlPonteDrive()) {
+        enviarBancoParaPonteDrive(false);
+      } else {
+        abrirConfiguracoes();
+        mostrarToast("Cole o Link da sua Ponte Google Drive para ativar o envio direto!", "error");
+      }
+    }
+
+    function exportarArquivoJsonLocal() {
+      const pacoteNuvem = {
+        sistema: "Linfa Gerais",
+        contaGoogle: userLogado.email,
+        dataSincronizacao: new Date().toISOString(),
+        pacientes: pacientesBanco
+      };
+      const blob = new Blob([JSON.stringify(pacoteNuvem, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Linfa_Gerais_Backup_${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      mostrarToast("Cópia manual (.json) descarregada.");
+    }
+
+    function importarBackupDrive(event) {
+      const file = event.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const dados = JSON.parse(e.target.result);
+          const lista = Array.isArray(dados) ? dados : (dados.pacientes || []);
+          pacientesBanco = lista;
+          await salvarBanco(true);
+          renderListaPacientes();
+          fecharModal('modal-config');
+          mostrarToast("Dados restaurados com sucesso!");
+        } catch(err) {
+          mostrarToast("Ficheiro inválido.", "error");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // ================= NAVEGAÇÃO, DEFINIÇÕES E PDF =================
+    function mudarAba(abaId) {
+      ['timeline', 'alimentar', 'dados'].forEach(a => {
+        document.getElementById('aba-'+a).classList.add('hidden');
+        document.getElementById('tab-'+a).className = "pb-4 tab-inactive flex items-center gap-2 text-sm tracking-wide whitespace-nowrap";
+      });
+      document.getElementById('aba-'+abaId).classList.remove('hidden');
+      document.getElementById('tab-'+abaId).className = "pb-4 tab-active flex items-center gap-2 text-sm tracking-wide whitespace-nowrap";
+    }
+
+    function abrirConfiguracoes() {
+      document.getElementById('cfg-nome').value = userLogado.nome;
+      document.getElementById('cfg-email').value = userLogado.email;
+      document.getElementById('cfg-pass').value = "";
+      document.getElementById('cfg-drive-bridge-url').value = obterUrlPonteDrive();
+      abrirModal('modal-config', 'modal-config-box');
+    }
+
+    function salvarConfiguracoes() {
+      const novoNome = document.getElementById('cfg-nome').value.trim();
+      const novoEmail = document.getElementById('cfg-email').value.trim();
+      const novaPass = document.getElementById('cfg-pass').value;
+      const bridgeUrl = document.getElementById('cfg-drive-bridge-url').value.trim();
+
+      if(!novoNome || !novoEmail) return mostrarToast("Preencha nome e email.", "error");
+
+      userLogado.nome = novoNome;
+      userLogado.email = novoEmail;
+      if(novaPass.trim() !== "") userLogado.pass = novaPass;
+
+      localStorage.setItem("linfa_gerais_drive_bridge_url", bridgeUrl);
+      sessionStorage.setItem("linfa_gerais_session", JSON.stringify(userLogado));
+
+      document.getElementById('nome-user-logado').textContent = userLogado.nome;
+      document.getElementById('avatar-user').textContent = userLogado.nome.substring(0,2).toUpperCase();
+      document.getElementById('status-conta-google').textContent = userLogado.email;
+      atualizarBadgeStatusPonte();
+
+      fecharModal('modal-config');
+      mostrarToast("Configurações da Ponte Google Drive guardadas!");
+      if(bridgeUrl) enviarBancoParaPonteDrive(true);
+    }
+
+    function abrirModal(bg, box) {
+      const elBg = document.getElementById(bg);
+      const elBox = document.getElementById(box);
+      elBg.classList.remove('hidden');
+      setTimeout(() => {
+        elBg.classList.remove('opacity-0');
+        if(elBox) elBox.classList.replace('scale-95', 'scale-100');
+      }, 10);
+    }
+
+    function fecharModal(bg) {
+      const b = document.getElementById(bg);
+      b.classList.add('opacity-0');
+      if(b.firstElementChild) b.firstElementChild.classList.replace('scale-100', 'scale-95');
+      setTimeout(() => b.classList.add('hidden'), 300);
+    }
+
+    function gerarPDF() {
+      mostrarToast("A preparar relatório cronológico em PDF...");
+      document.getElementById('aba-timeline').classList.remove('hidden');
+      document.getElementById('aba-dados').classList.remove('hidden');
+      const nomePac = document.getElementById('pacNomeTopo').value || "Paciente";
+      const opt = {
+        margin: 0.4,
+        filename: `Linfa_Gerais_${nomePac}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
+      };
+      html2pdf().set(opt).from(document.getElementById('conteudo-pdf')).save().then(() => {
+        mostrarToast("PDF Exportado com sucesso!");
+        mudarAba('timeline');
+      });
+    }
+
+    async function limparDadosLocais() {
+      if(confirm("Deseja limpar o cache deste aparelho? (Os dados salvos no seu Google Drive continuarão intactos na nuvem)")) {
+        pacientesBanco = [];
+        await salvarBanco(false);
+        renderListaPacientes();
+        document.getElementById('fichaPaciente').classList.add('hidden');
+        document.getElementById('estadoVazio').classList.remove('hidden');
+        fecharModal('modal-config');
+        mostrarToast("Cache local limpo.");
+      }
+    }
+  </script>
+</body>
+</html>
